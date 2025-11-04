@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost:27017/react-connect');
+mongoose.connect('mongodb+srv://nintupunnoose:nintu@cluster0.y2zmw5s.mongodb.net/ContactSave?retryWrites=true&w=majority&appName=Cluster0');
 
 const db = mongoose.connection;
 
@@ -8,5 +8,6 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => {
   console.log('Connected to MongoDB');
 });
+
 
 module.exports = db;
