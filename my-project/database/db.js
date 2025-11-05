@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb+srv://nintupunnoose:nintu@cluster0.y2zmw5s.mongodb.net/ContactSave?retryWrites=true&w=majority&appName=Cluster0');
+mongoose.connect('mongodb://adminComs:ComstreaM2025@16.171.53.11:27017/admin');
 
 const db = mongoose.connection;
 
@@ -11,3 +11,4 @@ db.once('open', () => {
 
 
 module.exports = db;
+
