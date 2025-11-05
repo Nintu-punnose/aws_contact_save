@@ -6,63 +6,67 @@ const crypto = require('crypto');
 const Product = require('../Models/product');
 const User = require('../Models/user');
 
-// user register
-router.post('/create_user', async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        console.log(name, email, password);
-        
-        // Validate input
-        if (!name || !email || !password) {
-            return res.status(400).json({ message: 'Name, email, and password are required' });
-        }
-        
-        // Check if user already exists
-        const existingUser = await User.findOne({ email: email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
-        
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-        
-        const user = new User({ name, email, password: hashedPassword });
-        console.log(user);
-        
-        await user.save();
-        res.status(200).json({ message: 'user created successfully' });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'error', error: error.message });
-    }
-});
-
-// generate token
+// Generate token helper
 const generateSecretKey = () => {
     return crypto.randomBytes(32).toString('hex');
 };
 
-// user login
+// ✅ USER REGISTER (FIXED - ONLY ONE ROUTE)
+router.post('/create_user', async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        // Validate input
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ email: email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email already registered' });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create and save user
+        const user = new User({ name, email, password: hashedPassword });
+        console.log('Creating user:', user);
+        
+        await user.save();
+        res.status(200).json({ message: 'User created successfully' });
+    } catch (error) {
+        console.log('Error in create_user:', error);
+        res.status(500).json({ message: 'Error creating user', error: error.message });
+    }
+});
+
+// ✅ USER LOGIN
 router.post('/user_login', async (req, res) => {
     try {
-        const email = req.body.email;
-        console.log(email);
+        const { email, password } = req.body;
         
-        // Find user by email
+        // Validate input
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
+        
+        console.log('Login attempt for email:', email);
+        
+        // Find user
         const user = await User.findOne({ email: email });
-        
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        
-        // Compare passwords (bcrypt.compare is async)
-        const isPasswordValid = await bcrypt.compare(req.body.password, user.password);
-        
+
+        // Compare passwords (must use await)
+        const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        
-        console.log("creating token");
+
+        console.log("Creating token");
         
         // Create JWT token
         const token = jwt.sign(
@@ -71,20 +75,24 @@ router.post('/user_login', async (req, res) => {
             { expiresIn: '1h' }
         );
         
-        console.log(user._id);
-        res.status(200).json({ token, userId: user._id, email: email });
+        console.log('Login successful for user:', user._id);
+        res.status(200).json({ 
+            token: token,
+            userId: user._id,
+            email: email,
+            message: 'Login successful'
+        });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'error', error: error.message });
+        console.log('Error in user_login:', error);
+        res.status(500).json({ message: 'Login error', error: error.message });
     }
 });
 
-// creating product
+// ✅ CREATE PRODUCT
 router.post('/create_product_api', async (req, res) => {
     try {
         const { name, description, price, userid } = req.body;
         
-        // Validate input
         if (!name || !description || !price || !userid) {
             return res.status(400).json({ message: 'All fields are required' });
         }
@@ -94,12 +102,12 @@ router.post('/create_product_api', async (req, res) => {
         
         res.status(201).json({ message: 'Product created successfully' });
     } catch (error) {
-        console.error(error);
+        console.error('Error in create_product_api:', error);
         res.status(500).json({ message: 'Server Error', error: error.message });
     }
 });
 
-// retrieve product
+// ✅ RETRIEVE PRODUCTS
 router.get('/retrieve_product_api/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -115,47 +123,46 @@ router.get('/retrieve_product_api/:id', async (req, res) => {
         
         res.status(200).json({ data: serializedData });
     } catch (error) {
-        console.error(error);
+        console.error('Error in retrieve_product_api:', error);
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 });
 
-// delete product
+// ✅ DELETE PRODUCT
 router.delete('/delete_product_api/:id', async (req, res) => {
     try {
         const pro_id = req.params.id;
-        console.log(pro_id);
+        console.log('Deleting product:', pro_id);
         
         await Product.findByIdAndDelete(pro_id);
-        res.status(200).json({ message: 'Delete successfully' });
+        res.status(200).json({ message: 'Product deleted successfully' });
     } catch (error) {
-        console.error(error);
+        console.error('Error in delete_product_api:', error);
         res.status(500).json({ message: 'Error deleting product', error: error.message });
     }
 });
 
-// update product
+// ✅ UPDATE PRODUCT
 router.put('/update_product_api/:id', async (req, res) => {
     try {
         const pro_id = req.params.id;
-        console.log(pro_id);
-        
         const { name, price, description } = req.body;
         
-        // Validate input
         if (!name || !price || !description) {
             return res.status(400).json({ message: 'All fields are required' });
         }
         
+        console.log('Updating product:', pro_id);
+        
         await Product.findByIdAndUpdate(pro_id, { name, price, description });
-        res.status(200).json({ message: "product updated successfully" });
+        res.status(200).json({ message: 'Product updated successfully' });
     } catch (error) {
-        console.error(error);
+        console.error('Error in update_product_api:', error);
         res.status(500).json({ message: 'Error updating product', error: error.message });
     }
 });
 
-// user logout
+// ✅ LOGOUT
 router.post("/logout", (req, res) => {
     console.log("Logout request received");
     res.status(200).json({ message: "Logout successful" });
