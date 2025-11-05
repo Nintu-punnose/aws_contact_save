@@ -10,7 +10,7 @@ const User = require('../Models/user');
 // user register
 router.post('/create_user',(req,res)=>{
     const {name,email,password} = req.body;
-
+    console.log(name,email,password)
     const user = new User({name,email,password});
     console.log(user)
     user.save().then(()=>{
@@ -123,5 +123,6 @@ router.post("/logout", (req, res) => {
 });
 
 module.exports = router;
+
 
 
