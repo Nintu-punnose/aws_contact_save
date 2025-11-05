@@ -3,7 +3,8 @@ var router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const {Product,User} = require('../Models/product');
+const Product = require('../Models/product');
+const User = require('../Models/user');
 
 
 // user register
