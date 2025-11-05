@@ -11,58 +11,26 @@ const Register = () => {
   const [loading, setloading] = useState(false);
   const navigate = useNavigate();
 
-  // Email validation
-  const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   function savechange(e) {
     e.preventDefault();
     
-    // Trim whitespace
-    const trimmedName = name.trim();
-    const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
-    
-    // Validation checks
-    if (!trimmedName || !trimmedEmail || !trimmedPassword) {
+    if (!name || !email || !password) {
       seterror('All fields are required');
       return;
     }
     
-    if (trimmedName.length < 3) {
-      seterror('Name must be at least 3 characters long');
-      return;
-    }
-    
-    if (!isValidEmail(trimmedEmail)) {
-      seterror('Please enter a valid email address');
-      return;
-    }
-    
-    if (trimmedPassword.length < 6) {
-      seterror('Password must be at least 6 characters long');
-      return;
-    }
-    
     setloading(true);
-    const data = { 
-      name: trimmedName, 
-      email: trimmedEmail, 
-      password: trimmedPassword 
-    };
-    
-    axios.post('/api/create_user', data)
+    const data = { name: name, email: email, password: password };
+
+    axios.post('/api/create_user', data)  // ✅ FIXED - Added '/api'
       .then(response => {
         console.log("User created successfully:", response.data);
         seterror('');
-        alert('Registration successful! Redirecting to home...');
         navigate("/");
       })
       .catch(error => {
         console.error("Error occurred:", error);
-        const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
+        const errorMessage = error.response?.data?.message || 'Registration failed';
         seterror(errorMessage);
       })
       .finally(() => setloading(false));
@@ -86,7 +54,6 @@ const Register = () => {
                     value={name} 
                     onChange={(e) => setname(e.target.value)}
                     disabled={loading}
-                    placeholder="Enter your full name"
                     required
                   />
                 </div>
@@ -98,7 +65,6 @@ const Register = () => {
                     value={email} 
                     onChange={(e) => setemail(e.target.value)}
                     disabled={loading}
-                    placeholder="Enter your email"
                     required
                   />
                 </div>
@@ -110,13 +76,12 @@ const Register = () => {
                     value={password} 
                     onChange={(e) => setpassword(e.target.value)}
                     disabled={loading}
-                    placeholder="Enter password (min 6 characters)"
                     required
                   />
                 </div>
                 <button 
                   type="submit" 
-                  className="btn btn-primary w-100" 
+                  className="btn btn-primary w-100"
                   disabled={loading}
                 >
                   {loading ? 'Registering...' : 'Register'}
