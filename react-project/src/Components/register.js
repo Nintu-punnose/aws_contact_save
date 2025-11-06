@@ -22,7 +22,7 @@ const Register = () => {
     setloading(true);
     const data = { name: name, email: email, password: password };
 
-    axios.post('http://localhost:3002/api/create_user', data)  // ✅ FIXED - Added '/api'
+    axios.post('/api/create_user', data)  // ✅ FIXED - Added '/api'
       .then(response => {
         console.log("User created successfully:", response.data);
         seterror('');
@@ -96,4 +96,5 @@ const Register = () => {
 };
 
 export default Register;
+
 
