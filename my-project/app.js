@@ -3,20 +3,23 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var cors = require('cors'); // ✅ ADD THIS LINE
+var cors = require('cors'); // ✅ Import CORS
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const db = require('./database/db');
 var app = express();
 
-// ✅ ADD CORS MIDDLEWARE HERE (BEFORE OTHER MIDDLEWARE)
+// ✅ CORS MUST BE FIRST - BEFORE ALL OTHER MIDDLEWARE
 app.use(cors({
-    origin: 'http://16.171.53.11', // Your frontend URL
+    origin: ['http://16.171.53.11', 'http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// OR use this simpler version for testing:
+// app.use(cors());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -28,8 +31,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-var apiRouter = require('./routes/api'); // import the api route
-app.use('/api', apiRouter); // set up for api route
+var apiRouter = require('./routes/api');
+app.use('/api', apiRouter);
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
@@ -40,11 +43,8 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
   res.status(err.status || 500);
   res.render('error');
 });
