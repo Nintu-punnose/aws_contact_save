@@ -12,7 +12,7 @@ var app = express();
 
 // ✅ CORS MUST BE FIRST - BEFORE ALL OTHER MIDDLEWARE
 app.use(cors({
-    origin: ['http://16.171.53.11', 'http://localhost:3000', 'http://localhost:3001'],
+    origin: ['http://16.171.53.11', 'http://localhost:3000', 'http://localhost:3001','http://localhost:3002'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
