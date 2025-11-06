@@ -3,20 +3,24 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var cors = require('cors'); // ✅ ADD THIS LINE
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-
-const db = require('./database/db')
-
+const db = require('./database/db');
 var app = express();
 
+// ✅ ADD CORS MIDDLEWARE HERE (BEFORE OTHER MIDDLEWARE)
+app.use(cors({
+    origin: 'http://16.171.53.11', // Your frontend URL
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
-
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -24,9 +28,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-var apiRouter = require('./routes/api');// import the api route
-app.use('/api', apiRouter);// set up for api route
-
+var apiRouter = require('./routes/api'); // import the api route
+app.use('/api', apiRouter); // set up for api route
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
@@ -45,8 +48,5 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-
-
 
 module.exports = app;
